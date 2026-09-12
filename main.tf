@@ -66,3 +66,73 @@ resource "aws_route_table_association" "public_subnet_assoc" {
   subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.public_rt.id
 }
+
+#
+resource "aws_security_group" "ec2_sg" {
+  name        = "terraform-lab-ec2-sg"
+  description = "Allow SSH access to Terraform lab EC2"
+  vpc_id      = aws_vpc.lab_vpc.id
+
+  ingress {
+    description = "SSH from my current public IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["103.60.171.224/32"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "terraform-lab-ec2-sg"
+    Environment = "training"
+    ManagedBy   = "Terraform"
+  }
+}
+
+#an AMI. Instead of hardcoding one, use a data source:
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023.*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+#add the EC2 instance:  
+resource "aws_instance" "lab_ec2" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.public_subnet.id
+  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+
+  key_name = aws_key_pair.lab_key.key_name
+
+  tags = {
+    Name        = "terraform-lab-ec2"
+    Environment = "training"
+    ManagedBy   = "Terraform"
+  }
+}
+#register the public key with AWS
+resource "aws_key_pair" "lab_key" {
+  key_name   = "terraform-lab-key"
+  public_key = file("~/.ssh/terraform-lab.pub")
+
+  tags = {
+    Environment = "training"
+    ManagedBy   = "Terraform"
+  }
+}
