@@ -1,0 +1,48 @@
+Console sign-in URL
+
+https://789655958476.signin.aws.amazon.com/console
+User name
+
+user:
+mira-terraform-admin
+
+lQ54!S87
+Hide
+
+
+
+# aws_vpc.lab_vpc:
+resource "aws_vpc" "lab_vpc" {
+    arn                                  = "arn:aws:ec2:us-east-1:789655958476:v
+pc/vpc-065d0f01ea58941a9"
+    assign_generated_ipv6_cidr_block     = false
+    cidr_block                           = "10.0.0.0/16"
+    default_network_acl_id               = "acl-0bffff1484a5a77d7"
+    default_route_table_id               = "rtb-076f4cf4def7f6df8"
+    default_security_group_id            = "sg-0e81ac6d86cbb5fec"
+    dhcp_options_id                      = "dopt-021e71a97f3d72841"
+    enable_dns_hostnames                 = false
+    enable_dns_support                   = true
+    enable_network_address_usage_metrics = false
+    id                                   = "vpc-065d0f01ea58941a9"
+    instance_tenancy                     = "default"
+    ipv6_association_id                  = null
+    ipv6_cidr_block                      = null
+    ipv6_cidr_block_network_border_group = null
+    ipv6_ipam_pool_id                    = null
+    ipv6_netmask_length                  = 0
+    main_route_table_id                  = "rtb-076f4cf4def7f6df8"
+    owner_id                             = "789655958476"
+    region                               = "us-east-1"
+    tags                                 = {
+        "Environment" = "lab"
+        "ManagedBy"   = "Terraform"
+        "Name"        = "terraform-lab-vpc"
+    }
+    tags_all                             = {
+        "Environment" = "lab"
+        "ManagedBy"   = "Terraform"
+        "Name"        = "terraform-lab-vpc"
+    }
+}
+s
