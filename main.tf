@@ -13,14 +13,25 @@ provider "aws" {
   region = var.aws_region
 }
 
+locals {
+  project_name = "terraform-lab"
+
+  common_tags = {
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+    Project     = local.project_name
+  }
+}
+
 resource "aws_vpc" "lab_vpc" {
   cidr_block = var.vpc_cidr
 
-  tags = {
-    Name        = "terraform-lab-vpc"
-    Environment = "training"
-    ManagedBy   = "Terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.project_name}-vpc"
+    }
+  )
 }
 
 resource "aws_subnet" "public_subnet" {
@@ -28,32 +39,35 @@ resource "aws_subnet" "public_subnet" {
   cidr_block              = var.public_subnet_cidr
   map_public_ip_on_launch = true
 
-  tags = {
-    Name        = "terraform-lab-public-subnet"
-    Environment = "training"
-    ManagedBy   = "Terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.project_name}-public-subnet"
+    }
+  )
 }
 
 resource "aws_internet_gateway" "lab_igw" {
   vpc_id = aws_vpc.lab_vpc.id
 
-  tags = {
-    Name        = "terraform-lab-igw"
-    Environment = "training"
-    ManagedBy   = "Terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.project_name}-igw"
+    }
+  )
 }
 
 #aws_route_table
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.lab_vpc.id
 
-  tags = {
-    Name        = "terraform-lab-public-rt"
-    Environment = "training"
-    ManagedBy   = "Terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.project_name}-public-rt"
+    }
+  )
 }
 
 resource "aws_route" "public_internet_access" {
@@ -88,11 +102,12 @@ resource "aws_security_group" "ec2_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name        = "terraform-lab-ec2-sg"
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.project_name}-ec2-sg"
+    }
+  )
 }
 
 #an AMI. Instead of hardcoding one, use a data source:
@@ -120,19 +135,17 @@ resource "aws_instance" "lab_ec2" {
 
   key_name = aws_key_pair.lab_key.key_name
 
-  tags = {
-    Name        = "terraform-lab-ec2"
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.project_name}-ec2"
+    }
+  )
 }
 #register the public key with AWS
 resource "aws_key_pair" "lab_key" {
   key_name   = "terraform-lab-key"
   public_key = file("~/.ssh/terraform-lab.pub")
 
-  tags = {
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-  }
+  tags = local.common_tags
 }
