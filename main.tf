@@ -34,3 +34,13 @@ resource "aws_subnet" "public_subnet" {
     ManagedBy   = "Terraform"
   }
 }
+
+resource "aws_internet_gateway" "lab_igw" {
+  vpc_id = aws_vpc.lab_vpc.id
+
+  tags = {
+    Name        = "terraform-lab-igw"
+    Environment = "training"
+    ManagedBy   = "Terraform"
+  }
+}
