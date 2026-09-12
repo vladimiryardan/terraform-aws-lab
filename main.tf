@@ -10,11 +10,11 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 
 resource "aws_vpc" "lab_vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.vpc_cidr
 
   tags = {
     Name        = "terraform-lab-vpc"
@@ -25,7 +25,7 @@ resource "aws_vpc" "lab_vpc" {
 
 resource "aws_subnet" "public_subnet" {
   vpc_id                  = aws_vpc.lab_vpc.id
-  cidr_block              = "10.0.1.0/24"
+  cidr_block              = var.public_subnet_cidr
   map_public_ip_on_launch = true
 
   tags = {
@@ -78,7 +78,7 @@ resource "aws_security_group" "ec2_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["103.60.171.224/32"]
+    cidr_blocks = [var.ssh_allowed_cidr]
   }
 
   egress {
@@ -90,7 +90,7 @@ resource "aws_security_group" "ec2_sg" {
 
   tags = {
     Name        = "terraform-lab-ec2-sg"
-    Environment = "training"
+    Environment = var.environment
     ManagedBy   = "Terraform"
   }
 }
@@ -114,7 +114,7 @@ data "aws_ami" "amazon_linux" {
 #add the EC2 instance:  
 resource "aws_instance" "lab_ec2" {
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = "t3.micro"
+  instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
@@ -122,7 +122,7 @@ resource "aws_instance" "lab_ec2" {
 
   tags = {
     Name        = "terraform-lab-ec2"
-    Environment = "training"
+    Environment = var.environment
     ManagedBy   = "Terraform"
   }
 }
@@ -132,7 +132,7 @@ resource "aws_key_pair" "lab_key" {
   public_key = file("~/.ssh/terraform-lab.pub")
 
   tags = {
-    Environment = "training"
+    Environment = var.environment
     ManagedBy   = "Terraform"
   }
 }
