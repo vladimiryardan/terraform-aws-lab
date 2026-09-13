@@ -24,7 +24,7 @@ resource "aws_instance" "lab_ec2" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${local.project_name}-ec2"
+      Name = "${local.project_name}-${var.environment}-ec2"
     }
   )
 }
