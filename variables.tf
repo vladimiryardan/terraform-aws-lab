@@ -64,3 +64,9 @@ variable "ssh_allowed_cidr" {
     error_message = "ssh_allowed_cidr must be a valid CIDR block."
   }
 }
+
+variable "availability_zone" {
+  description = "Availability Zone for resources that require an explicit AZ"
+  type        = string
+  default     = null
+}
