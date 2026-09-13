@@ -4,7 +4,7 @@ resource "aws_vpc" "lab_vpc" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${local.project_name}-vpc"
+      Name = "${local.project_name}-${var.environment}-vpc"
     }
   )
 }
@@ -17,7 +17,7 @@ resource "aws_subnet" "public_subnet" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${local.project_name}-public-subnet"
+      Name = "${local.project_name}-${var.environment}-public-subnet"
     }
   )
 }
@@ -28,7 +28,7 @@ resource "aws_internet_gateway" "lab_igw" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${local.project_name}-igw"
+      Name = "${local.project_name}-${var.environment}-igw"
     }
   )
 }
@@ -39,7 +39,7 @@ resource "aws_route_table" "public_rt" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${local.project_name}-public-rt"
+      Name = "${local.project_name}-${var.environment}-public-rt"
     }
   )
 }
