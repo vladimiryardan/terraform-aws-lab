@@ -15,12 +15,3 @@ provider "aws" {
   region = var.aws_region
 }
 
-locals {
-  project_name = "terraform-lab"
-
-  common_tags = {
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-    Project     = local.project_name
-  }
-}
