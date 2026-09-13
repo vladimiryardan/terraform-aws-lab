@@ -17,6 +17,16 @@ if [[ ! -f "$BACKEND_FILE" || ! -f "$VARS_FILE" ]]; then
   exit 1
 fi
 
+if [[ "$ENV_NAME" == "prod" ]]; then
+  echo "WARNING: You are about to apply PRODUCTION."
+  read -p "Type PROD to continue: " CONFIRM
+
+  if [[ "$CONFIRM" != "PROD" ]]; then
+    echo "Production apply cancelled."
+    exit 1
+  fi
+fi
+
 echo "Applying environment: $ENV_NAME"
 
 terraform init \
