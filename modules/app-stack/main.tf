@@ -96,7 +96,7 @@ resource "aws_security_group" "ec2_sg" {
 
 resource "aws_key_pair" "lab_key" {
   key_name   = var.environment == "dev" ? "${local.project_name}-key" : "${local.project_name}-${var.environment}-key"
-  public_key = file("~/.ssh/terraform-lab.pub")
+  public_key = var.public_key
 
   tags = local.common_tags
 }

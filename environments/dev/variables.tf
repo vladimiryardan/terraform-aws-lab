@@ -70,3 +70,10 @@ variable "availability_zone" {
   type        = string
   default     = null
 }
+
+variable "public_key" {
+  description = "SSH public key used for the EC2 key pair"
+  type        = string
+  sensitive   = true
+  default     = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDUMMYKEYFORVALIDATIONONLY terraform-ci"
+}

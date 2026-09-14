@@ -7,5 +7,5 @@ module "app_stack" {
   instance_type      = var.instance_type
   ssh_allowed_cidr   = var.ssh_allowed_cidr
   availability_zone  = var.availability_zone
-  public_key_path    = "~/.ssh/terraform-lab.pub"
+  public_key         = var.public_key
 }   

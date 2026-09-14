@@ -23,6 +23,7 @@ variable "availability_zone" {
   default = null
 }
 
-variable "public_key_path" {
-  type = string
+variable "public_key" {
+  description = "SSH public key used for the EC2 key pair"
+  type        = string
 }
