@@ -2,36 +2,27 @@
 
 set -e
 
-ENV_NAME="$1"
+ENVIRONMENT="$1"
+ENV_DIR="environments/$ENVIRONMENT"
 
-if [[ -z "$ENV_NAME" ]]; then
-  echo "Usage: ./tfapply.sh dev|staging|prod"
+if [ ! -d "$ENV_DIR" ]; then
+  echo "Unknown environment: $ENVIRONMENT"
   exit 1
 fi
 
-BACKEND_FILE="environments/$ENV_NAME/backend.hcl"
-VARS_FILE="environments/$ENV_NAME/terraform.tfvars"
+if [ "$ENVIRONMENT" = "prod" ]; then
+  read -r -p "Type PROD to continue: " CONFIRM
 
-if [[ ! -f "$BACKEND_FILE" || ! -f "$VARS_FILE" ]]; then
-  echo "Environment configuration missing for: $ENV_NAME"
-  exit 1
-fi
-
-if [[ "$ENV_NAME" == "prod" ]]; then
-  echo "WARNING: You are about to apply PRODUCTION."
-  read -p "Type PROD to continue: " CONFIRM
-
-  if [[ "$CONFIRM" != "PROD" ]]; then
-    echo "Production apply cancelled."
+  if [ "$CONFIRM" != "PROD" ]; then
+    echo "Cancelled."
     exit 1
   fi
 fi
 
-echo "Applying environment: $ENV_NAME"
+cd "$ENV_DIR" || exit 1
 
 terraform init \
   -reconfigure \
-  -backend-config="$BACKEND_FILE"
+  -backend-config=backend.hcl
 
-terraform apply \
-  -var-file="$VARS_FILE"
+terraform apply

@@ -2,33 +2,22 @@
 
 set -e
 
-ENV_NAME="$1"
+ENVIRONMENT="$1"
+ENV_DIR="environments/$ENVIRONMENT"
 
-if [[ -z "$ENV_NAME" ]]; then
-  echo "Usage: ./tfenv.sh dev|staging|prod"
+if [ ! -d "$ENV_DIR" ]; then
+  echo "Unknown environment: $ENVIRONMENT"
   exit 1
 fi
 
-BACKEND_FILE="environments/$ENV_NAME/backend.hcl"
-VARS_FILE="environments/$ENV_NAME/terraform.tfvars"
-
-if [[ ! -f "$BACKEND_FILE" ]]; then
-  echo "Backend file not found: $BACKEND_FILE"
-  exit 1
-fi
-
-if [[ ! -f "$VARS_FILE" ]]; then
-  echo "Variables file not found: $VARS_FILE"
-  exit 1
-fi
-
-echo "Switching Terraform to environment: $ENV_NAME"
+cd "$ENV_DIR" || exit 1
 
 terraform init \
   -reconfigure \
-  -backend-config="$BACKEND_FILE"
+  -backend-config=backend.hcl
 
 echo
-echo "Environment ready: $ENV_NAME"
+echo "Environment ready: $ENVIRONMENT"
+echo "Directory: $ENV_DIR"
 echo "Use:"
-echo "terraform plan -var-file=$VARS_FILE"
+echo "terraform plan"

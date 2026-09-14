@@ -2,26 +2,18 @@
 
 set -e
 
-ENV_NAME="$1"
+ENVIRONMENT="$1"
+ENV_DIR="environments/$ENVIRONMENT"
 
-if [[ -z "$ENV_NAME" ]]; then
-  echo "Usage: ./tfplan.sh dev|staging|prod"
+if [ ! -d "$ENV_DIR" ]; then
+  echo "Unknown environment: $ENVIRONMENT"
   exit 1
 fi
 
-BACKEND_FILE="environments/$ENV_NAME/backend.hcl"
-VARS_FILE="environments/$ENV_NAME/terraform.tfvars"
-
-if [[ ! -f "$BACKEND_FILE" || ! -f "$VARS_FILE" ]]; then
-  echo "Environment configuration missing for: $ENV_NAME"
-  exit 1
-fi
-
-echo "Planning environment: $ENV_NAME"
+cd "$ENV_DIR" || exit 1
 
 terraform init \
   -reconfigure \
-  -backend-config="$BACKEND_FILE"
+  -backend-config=backend.hcl
 
-terraform plan \
-  -var-file="$VARS_FILE"
+terraform plan
