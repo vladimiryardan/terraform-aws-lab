@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-    TF_VAR_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDUMMYKEYFORCIVALIDATIONONLY terraform-ci"
+        TF_VAR_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDUMMYKEYFORCIVALIDATIONONLY terraform-ci"
 
     strategy:
       matrix:
