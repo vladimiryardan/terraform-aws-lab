@@ -84,7 +84,7 @@ resource "aws_iam_role" "github_actions" {
           }
 
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:vladimiryardan/terraform-aws-lab:*"
+            "token.actions.githubusercontent.com:sub" = "repo:vladimiryardan@14102192/terraform-aws-lab@1367344974:*"
           }
         }
       }
