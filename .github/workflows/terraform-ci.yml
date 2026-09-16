@@ -18,14 +18,27 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        TF_VAR_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDUMMYKEYFORCIVALIDATIONONLY terraform-ci"
+      TF_VAR_environment: ${{ matrix.environment }}
+      TF_VAR_vpc_cidr: ${{ matrix.vpc_cidr }}
+      TF_VAR_public_subnet_cidr: ${{ matrix.public_subnet_cidr }}
+      TF_VAR_ssh_allowed_cidr: "103.60.171.224/32"
+      TF_VAR_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDUMMYKEYFORCIVALIDATIONONLY terraform-ci"
 
     strategy:
       matrix:
-        environment:
-          - dev
-          - staging
-          - prod
+        include:
+          - environment: dev
+            vpc_cidr: "10.0.0.0/16"
+            public_subnet_cidr: "10.0.1.0/24"
+
+          - environment: staging
+            vpc_cidr: "10.1.0.0/16"
+            public_subnet_cidr: "10.1.1.0/24"
+
+          - environment: prod
+            vpc_cidr: "10.2.0.0/16"
+            public_subnet_cidr: "10.2.1.0/24"
+            availability_zone: "us-east-1a"
 
     defaults:
       run:
@@ -60,3 +73,10 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan -no-color -out=tfplan
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ matrix.environment }}
+          path: environments/${{ matrix.environment }}/tfplan
+          retention-days: 7        
