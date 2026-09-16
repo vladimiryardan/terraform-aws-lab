@@ -96,3 +96,47 @@ resource "aws_iam_role_policy_attachment" "github_actions_read_only" {
   role       = aws_iam_role.github_actions.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
+
+resource "aws_iam_role_policy" "github_actions_terraform_state" {
+  name = "terraform-state-access"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Sid    = "ListTerraformStateBucket"
+        Effect = "Allow"
+
+        Action = [
+          "s3:ListBucket"
+        ]
+
+        Resource = aws_s3_bucket.terraform_state.arn
+      },
+      {
+        Sid    = "ReadTerraformState"
+        Effect = "Allow"
+
+        Action = [
+          "s3:GetObject"
+        ]
+
+        Resource = "${aws_s3_bucket.terraform_state.arn}/terraform-aws-lab/*"
+      },
+      {
+        Sid    = "ManageTerraformStateLocks"
+        Effect = "Allow"
+
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+
+        Resource = "${aws_s3_bucket.terraform_state.arn}/terraform-aws-lab/*.tflock"
+      }
+    ]
+  })
+}
