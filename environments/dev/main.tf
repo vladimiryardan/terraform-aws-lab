@@ -8,4 +8,6 @@ module "app_stack" {
   ssh_allowed_cidr   = var.ssh_allowed_cidr
   availability_zone  = var.availability_zone
   public_key         = var.public_key
+
+  ami_id = "ami-0b5358cc8c5df0b02"
 }   
