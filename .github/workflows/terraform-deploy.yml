@@ -18,6 +18,7 @@ on:
         type: choice
         options:
           - plan
+          - apply
 
 permissions:
   contents: read
@@ -54,6 +55,12 @@ jobs:
 
       - name: Verify AWS identity
         run: aws sts get-caller-identity  
+
+      - name: Protect staging and prod from apply
+        if: inputs.action == 'apply' && inputs.environment != 'dev'
+        run: |
+          echo "ERROR: Apply is currently allowed only for dev."
+          exit 1        
         
       - name: Set dev variables
         if: inputs.environment == 'dev'
@@ -79,6 +86,14 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
-
+  
       - name: Terraform Plan
+        if: inputs.action == 'plan'
         run: terraform plan -input=false -no-color        
+
+      - name: Terraform Apply
+        if: inputs.action == 'apply' && inputs.environment == 'dev'
+        run: terraform apply -input=false -auto-approve
+                
+
+        
