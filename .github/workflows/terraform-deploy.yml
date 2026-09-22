@@ -1,0 +1,84 @@
+name: Terraform Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+      action:
+        description: "Terraform action"
+        required: true
+        type: choice
+        options:
+          - plan
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform-deploy:
+    name: Terraform ${{ inputs.action }} (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+
+    env:
+      TF_VAR_environment: ${{ inputs.environment }}
+      TF_VAR_public_key: ${{ vars.TERRAFORM_PUBLIC_KEY }}
+      TF_VAR_ssh_allowed_cidr: "103.60.171.224/32"
+
+    defaults:
+      run:
+        working-directory: environments/${{ inputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::789655958476:role/terraform-github-actions
+          aws-region: us-east-1
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity  
+        
+      - name: Set dev variables
+        if: inputs.environment == 'dev'
+        run: |
+          echo "TF_VAR_vpc_cidr=10.0.0.0/16" >> "$GITHUB_ENV"
+          echo "TF_VAR_public_subnet_cidr=10.0.1.0/24" >> "$GITHUB_ENV"
+
+      - name: Set staging variables
+        if: inputs.environment == 'staging'
+        run: |
+          echo "TF_VAR_vpc_cidr=10.1.0.0/16" >> "$GITHUB_ENV"
+          echo "TF_VAR_public_subnet_cidr=10.1.1.0/24" >> "$GITHUB_ENV"
+
+      - name: Set prod variables
+        if: inputs.environment == 'prod'
+        run: |
+          echo "TF_VAR_vpc_cidr=10.2.0.0/16" >> "$GITHUB_ENV"
+          echo "TF_VAR_public_subnet_cidr=10.2.1.0/24" >> "$GITHUB_ENV"
+          echo "TF_VAR_availability_zone=us-east-1a" >> "$GITHUB_ENV"
+
+      - name: Terraform Init
+        run: terraform init -reconfigure -backend-config=backend.hcl                  
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -no-color        
