@@ -178,6 +178,8 @@ resource "aws_iam_role_policy" "github_actions_dev_deploy" {
           "ec2:DeleteSecurityGroup",
           "ec2:AuthorizeSecurityGroupIngress",
           "ec2:RevokeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupEgress",
 
           "ec2:ImportKeyPair",
           "ec2:DeleteKeyPair",
