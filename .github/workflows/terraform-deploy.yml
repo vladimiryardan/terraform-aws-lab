@@ -89,11 +89,15 @@ jobs:
   
       - name: Terraform Plan
         if: inputs.action == 'plan'
-        run: terraform plan -input=false -no-color        
+        run: terraform plan -input=false -no-color
+
+      - name: Terraform Plan for Apply
+        if: inputs.action == 'apply' && inputs.environment == 'dev'
+        run: terraform plan -input=false -out=tfplan
 
       - name: Terraform Apply
         if: inputs.action == 'apply' && inputs.environment == 'dev'
-        run: terraform apply -input=false -auto-approve
+        run: terraform apply -input=false tfplan
                 
 
         
