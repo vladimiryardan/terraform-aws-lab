@@ -19,6 +19,7 @@ on:
         options:
           - plan
           - apply
+          - destroy
 
 permissions:
   contents: read
@@ -56,11 +57,11 @@ jobs:
       - name: Verify AWS identity
         run: aws sts get-caller-identity  
 
-      - name: Protect staging and prod from apply
-        if: inputs.action == 'apply' && inputs.environment != 'dev'
+      - name: Protect staging and prod from changes
+        if: (inputs.action == 'apply' || inputs.action == 'destroy') && inputs.environment != 'dev'
         run: |
-          echo "ERROR: Apply is currently allowed only for dev."
-          exit 1        
+          echo "ERROR: Apply and destroy are currently allowed only for dev."
+          exit 1
         
       - name: Set dev variables
         if: inputs.environment == 'dev'
@@ -100,4 +101,10 @@ jobs:
         run: terraform apply -input=false tfplan
                 
 
-        
+      - name: Terraform Destroy Plan
+        if: inputs.action == 'destroy' && inputs.environment == 'dev'
+        run: terraform plan -destroy -input=false -out=tfplan
+
+      - name: Terraform Destroy
+        if: inputs.action == 'destroy' && inputs.environment == 'dev'
+        run: terraform apply -input=false tfplan
