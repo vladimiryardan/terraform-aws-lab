@@ -207,3 +207,106 @@ resource "aws_iam_role_policy" "github_actions_dev_deploy" {
     ]
   })
 }
+
+resource "aws_iam_role" "github_actions_deploy_dev" {
+  name = "terraform-github-actions-deploy-dev"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.github.arn
+        }
+
+        Action = "sts:AssumeRoleWithWebIdentity"
+
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+
+          StringLike = {
+            "token.actions.githubusercontent.com:sub" = "repo:vladimiryardan@14102192/terraform-aws-lab@1367344974:*"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_deploy_dev_read_only" {
+  role       = aws_iam_role.github_actions_deploy_dev.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+
+resource "aws_iam_role_policy" "github_actions_deploy_dev_permissions" {
+  name = "terraform-dev-deploy"
+  role = aws_iam_role.github_actions_deploy_dev.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Sid    = "ManageDevEC2AndNetworking"
+        Effect = "Allow"
+
+        Action = [
+          "ec2:CreateVpc",
+          "ec2:DeleteVpc",
+          "ec2:ModifyVpcAttribute",
+
+          "ec2:CreateSubnet",
+          "ec2:DeleteSubnet",
+          "ec2:ModifySubnetAttribute",
+
+          "ec2:CreateInternetGateway",
+          "ec2:DeleteInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:DetachInternetGateway",
+
+          "ec2:CreateRouteTable",
+          "ec2:DeleteRouteTable",
+          "ec2:AssociateRouteTable",
+          "ec2:DisassociateRouteTable",
+          "ec2:CreateRoute",
+          "ec2:DeleteRoute",
+
+          "ec2:CreateSecurityGroup",
+          "ec2:DeleteSecurityGroup",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupEgress",
+
+          "ec2:ImportKeyPair",
+          "ec2:DeleteKeyPair",
+
+          "ec2:RunInstances",
+          "ec2:TerminateInstances",
+
+          "ec2:CreateTags",
+          "ec2:DeleteTags"
+        ]
+
+        Resource = "*"
+      },
+      {
+        Sid    = "WriteDevTerraformState"
+        Effect = "Allow"
+
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+
+        Resource = "${aws_s3_bucket.terraform_state.arn}/terraform-aws-lab/dev/terraform.tfstate"
+      }
+    ]
+  })
+}
