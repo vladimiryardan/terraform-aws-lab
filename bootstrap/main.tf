@@ -310,3 +310,27 @@ resource "aws_iam_role_policy" "github_actions_deploy_dev_permissions" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "github_actions_deploy_dev_state_lock" {
+  name = "terraform-dev-state-lock"
+  role = aws_iam_role.github_actions_deploy_dev.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Sid    = "ManageDevTerraformStateLock"
+        Effect = "Allow"
+
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+
+        Resource = "${aws_s3_bucket.terraform_state.arn}/terraform-aws-lab/dev/terraform.tfstate.tflock"
+      }
+    ]
+  })
+}
