@@ -18,27 +18,15 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TF_VAR_environment: ${{ matrix.environment }}
-      TF_VAR_vpc_cidr: ${{ matrix.vpc_cidr }}
-      TF_VAR_public_subnet_cidr: ${{ matrix.public_subnet_cidr }}
-      TF_VAR_ssh_allowed_cidr: "103.60.171.224/32"
       TF_VAR_public_key: ${{ vars.TERRAFORM_PUBLIC_KEY }}
+      TF_VAR_ssh_allowed_cidr: ${{ vars.TERRAFORM_SSH_ALLOWED_CIDR }}
 
     strategy:
       matrix:
-        include:
-          - environment: dev
-            vpc_cidr: "10.0.0.0/16"
-            public_subnet_cidr: "10.0.1.0/24"
-
-          - environment: staging
-            vpc_cidr: "10.1.0.0/16"
-            public_subnet_cidr: "10.1.1.0/24"
-
-          - environment: prod
-            vpc_cidr: "10.2.0.0/16"
-            public_subnet_cidr: "10.2.1.0/24"
-            availability_zone: "us-east-1a"
+        environment:
+          - dev
+          - staging
+          - prod
 
     defaults:
       run:
@@ -71,10 +59,6 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Set prod availability zone
-        if: matrix.environment == 'prod'
-        run: echo "TF_VAR_availability_zone=us-east-1a" >> "$GITHUB_ENV"
-
       - name: Terraform Plan
-        run: terraform plan -input=false -no-color
+        run: terraform plan -input=false -no-color -var-file=environment.tfvars
 
