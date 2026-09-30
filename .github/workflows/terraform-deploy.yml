@@ -35,9 +35,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TF_VAR_environment: ${{ inputs.environment }}
       TF_VAR_public_key: ${{ vars.TERRAFORM_PUBLIC_KEY }}
-      TF_VAR_ssh_allowed_cidr: "103.60.171.224/32"
+      TF_VAR_ssh_allowed_cidr: ${{ vars.TERRAFORM_SSH_ALLOWED_CIDR }}
 
     defaults:
       run:
