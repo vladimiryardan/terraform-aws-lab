@@ -25,6 +25,10 @@ permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: terraform-${{ inputs.environment }}
+  cancel-in-progress: false
+
 jobs:
   terraform-deploy:
     name: Terraform ${{ inputs.action }} (${{ inputs.environment }})
