@@ -2,6 +2,9 @@
 *.tfstate
 *.tfstate.*
 *.tfvars
+!environments/dev/environment.tfvars
+!environments/staging/environment.tfvars
+!environments/prod/environment.tfvars
 *.tfvars.json
 *.tfplan
 tfplan
