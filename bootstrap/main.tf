@@ -97,6 +97,28 @@ resource "aws_iam_role_policy_attachment" "github_actions_read_only" {
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
+resource "aws_iam_role_policy" "github_actions_ec2_read" {
+  name = "terraform-ec2-read"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Sid    = "ReadEC2Infrastructure"
+        Effect = "Allow"
+
+        Action = [
+          "ec2:Describe*"
+        ]
+
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy" "github_actions_terraform_state" {
   name = "terraform-state-access"
   role = aws_iam_role.github_actions.id
@@ -141,7 +163,6 @@ resource "aws_iam_role_policy" "github_actions_terraform_state" {
   })
 }
 
-
 resource "aws_iam_role" "github_actions_deploy_dev" {
   name = "terraform-github-actions-deploy-dev"
 
@@ -177,6 +198,27 @@ resource "aws_iam_role_policy_attachment" "github_actions_deploy_dev_read_only" 
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
+resource "aws_iam_role_policy" "github_actions_deploy_dev_ec2_read" {
+  name = "terraform-ec2-read"
+  role = aws_iam_role.github_actions_deploy_dev.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Sid    = "ReadEC2Infrastructure"
+        Effect = "Allow"
+
+        Action = [
+          "ec2:Describe*"
+        ]
+
+        Resource = "*"
+      }
+    ]
+  })
+}
 
 resource "aws_iam_role_policy" "github_actions_deploy_dev_permissions" {
   name = "terraform-dev-deploy"
