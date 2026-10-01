@@ -92,11 +92,6 @@ resource "aws_iam_role" "github_actions" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "github_actions_read_only" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
-}
-
 resource "aws_iam_role_policy" "github_actions_ec2_read" {
   name = "terraform-ec2-read"
   role = aws_iam_role.github_actions.id
@@ -191,11 +186,6 @@ resource "aws_iam_role" "github_actions_deploy_dev" {
       }
     ]
   })
-}
-
-resource "aws_iam_role_policy_attachment" "github_actions_deploy_dev_read_only" {
-  role       = aws_iam_role.github_actions_deploy_dev.name
-  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
 resource "aws_iam_role_policy" "github_actions_deploy_dev_ec2_read" {
