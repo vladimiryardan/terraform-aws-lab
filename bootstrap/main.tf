@@ -261,6 +261,13 @@ resource "aws_iam_role_policy" "github_actions_deploy_dev_permissions" {
         ]
 
         Resource = "*"
+
+        Condition = {
+          StringEquals = {
+            "aws:RequestedRegion" = "us-east-1"
+          }
+        }
+
       },
       {
         Sid    = "WriteDevTerraformState"
