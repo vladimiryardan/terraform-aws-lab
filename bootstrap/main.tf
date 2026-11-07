@@ -219,11 +219,52 @@ resource "aws_iam_role_policy" "github_actions_deploy_dev_permissions" {
 
     Statement = [
       {
+        Sid    = "CreateTaggedDevVpc"
+        Effect = "Allow"
+
+        Action = [
+          "ec2:CreateVpc"
+        ]
+
+        Resource = "arn:aws:ec2:us-east-1:789655958476:vpc/*"
+
+        Condition = local.dev_create_conditions
+      },
+      {
+        Sid    = "TagDevResourcesOnCreate"
+        Effect = "Allow"
+
+        Action = [
+          "ec2:CreateTags"
+        ]
+
+        Resource = local.dev_taggable_resource_arns
+
+        Condition = {
+          StringEquals = {
+            "aws:RequestedRegion" = "us-east-1"
+
+            "ec2:CreateAction" = [
+              "CreateVpc",
+              "CreateSubnet",
+              "CreateInternetGateway",
+              "CreateRouteTable",
+              "CreateSecurityGroup",
+              "ImportKeyPair",
+              "RunInstances"
+            ]
+
+            "aws:RequestTag/Project"     = "terraform-lab"
+            "aws:RequestTag/Environment" = "dev"
+          }
+        }
+      },
+      {
         Sid    = "ManageDevEC2AndNetworking"
         Effect = "Allow"
 
         Action = [
-          "ec2:CreateVpc",
+
           "ec2:DeleteVpc",
           "ec2:ModifyVpcAttribute",
 
@@ -282,6 +323,28 @@ resource "aws_iam_role_policy" "github_actions_deploy_dev_permissions" {
       }
     ]
   })
+}
+
+locals {
+  dev_taggable_resource_arns = [
+    "arn:aws:ec2:us-east-1:789655958476:vpc/*",
+    "arn:aws:ec2:us-east-1:789655958476:subnet/*",
+    "arn:aws:ec2:us-east-1:789655958476:internet-gateway/*",
+    "arn:aws:ec2:us-east-1:789655958476:route-table/*",
+    "arn:aws:ec2:us-east-1:789655958476:security-group/*",
+    "arn:aws:ec2:us-east-1:789655958476:key-pair/*",
+    "arn:aws:ec2:us-east-1:789655958476:instance/*"
+  ]
+}
+
+locals {
+  dev_create_conditions = {
+    StringEquals = {
+      "aws:RequestedRegion"        = "us-east-1"
+      "aws:RequestTag/Project"     = "terraform-lab"
+      "aws:RequestTag/Environment" = "dev"
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "github_actions_deploy_dev_state_lock" {
